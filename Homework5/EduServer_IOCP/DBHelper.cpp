@@ -29,12 +29,14 @@ bool DbHelper::Initialize(const wchar_t* connInfoStr, int workerThreadCount)
 {
 	//todo: mSqlConnPool, mDbWorkerThreadCount를 워커스레스 수에 맞추어 초기화
 
+	// ODBC ENV 세팅하고
 	if (SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &mSqlHenv))
 	{
 		printf_s("DbHelper Initialize SQLAllocHandle failed\n");
 		return false;
 	}
 
+	// ODBC 3 으로 버전 세팅하고
 	if (SQL_SUCCESS != SQLSetEnvAttr(mSqlHenv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, SQL_IS_INTEGER))
 	{
 		printf_s("DbHelper Initialize SQLSetEnvAttr failed\n");
@@ -59,6 +61,7 @@ bool DbHelper::Initialize(const wchar_t* connInfoStr, int workerThreadCount)
 			SQLWCHAR msgText[1024] = { 0, } ;
 			SQLSMALLINT textLen = 0 ;
 
+			////TODO: 이게 뭐지?
 			SQLGetDiagRec(SQL_HANDLE_DBC, mSqlConnPool[i].mSqlHdbc, 1, sqlState, &nativeError, msgText, 1024, &textLen);
 
 			wprintf_s(L"DbHelper Initialize SQLDriverConnect failed: %s \n", msgText);

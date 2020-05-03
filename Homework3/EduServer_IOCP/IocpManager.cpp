@@ -121,6 +121,7 @@ void IocpManager::StartAccept()
 		return;
 	}
 		
+	// main thread에서 계속해서 AcceptEx()를 다시 해줌
 	while (GSessionManager->AcceptSessions())
 	{
 		Sleep(100);

@@ -9,6 +9,7 @@
 
 __declspec(thread) std::deque<Session*>* LSendRequestSessionList = nullptr;
 
+// send/recv buffer를 두고
 Session::Session(size_t sendBufSize, size_t recvBufSize) 
 : mSendBuffer(sendBufSize), mRecvBuffer(recvBufSize), mConnected(0), mRefCount(0), mSendPendingCount(0)
 {
@@ -41,6 +42,7 @@ void Session::DisconnectRequest(DisconnectReason dr)
 
 bool Session::PreRecv()
 {
+	////TODO: 이건 어떤 용도?
 	TRACE_THIS;
 
 	if (!IsConnected())

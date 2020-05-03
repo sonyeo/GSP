@@ -22,6 +22,7 @@ DBManager::~DBManager()
 
 bool DBManager::Initialize()
 {
+	// DB 작업용으로 IOCP 생성
 	/// Create I/O Completion Port
 	mDbCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (mDbCompletionPort == NULL)
@@ -51,6 +52,7 @@ bool DBManager::StartDatabaseThreads()
 	for (int i = 0; i < MAX_DB_THREAD; ++i)
 	{
 		DWORD dwThreadId;
+		// CREATE_SUSPENDED로 만든 후,
 		HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, DbWorkerThread, (LPVOID)i, CREATE_SUSPENDED, (unsigned int*)&dwThreadId);
 		if (hThread == NULL)
 			return false;
@@ -58,6 +60,7 @@ bool DBManager::StartDatabaseThreads()
 		mDbWorkerThread[i] = new DBThread(hThread, mDbCompletionPort);
 	}
 
+	// 동시에 시작!
 	/// start!
 	for (int i = 0; i < MAX_DB_THREAD; ++i)
 	{
@@ -72,6 +75,7 @@ unsigned int WINAPI DBManager::DbWorkerThread(LPVOID lpParam)
 {
 	LThreadType = THREAD_DB_WORKER;
 	LWorkerThreadId = reinterpret_cast<int>(lpParam);
+	////TODO: 얘네의 역할이 무엇인가?
 	GThreadCallHistory[LWorkerThreadId] = LThreadCallHistory = new ThreadCallHistory(LWorkerThreadId);
 	GThreadCallElapsedRecord[LWorkerThreadId] = LThreadCallElapsedRecord = new ThreadCallElapsedRecord(LWorkerThreadId);
 
@@ -83,6 +87,7 @@ unsigned int WINAPI DBManager::DbWorkerThread(LPVOID lpParam)
 
 void DBManager::PostDatabsaseRequest(DatabaseJobContext* dbContext)
 {
+	// 여기가 중요하군!!
 	//todo: PQCS를 이용하여 dbContext를 mDbCompletionPort에 보내기
 
 }

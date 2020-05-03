@@ -6,6 +6,7 @@
 
 class ClientSession;
 
+// 얘를 상속받아서 DB작업 마다 구체적인 동작 내용을 정의할예정
 /// 모든 DB관련 작업은 아래의 추상 클래스를 상속받아 사용해야 함
 struct DatabaseJobContext
 {

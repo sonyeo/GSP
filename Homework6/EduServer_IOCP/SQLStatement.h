@@ -1,5 +1,7 @@
 #pragma once
 
+// SP °°Àº ´À³¦..
+
 const wchar_t* SQL_LoadPlayer = L"{ call dbo.spLoadPlayer (?) }"; ///< uid
 
 const wchar_t* SQL_CreatePlayer = L"{ call dbo.spCreatePlayer ( ? ) }"; ///< name(32)

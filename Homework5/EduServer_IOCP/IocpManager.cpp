@@ -116,16 +116,19 @@ bool IocpManager::StartIoThreads()
 	{
 		
 		DWORD dwThreadId;
+		// thread를 시작하면서 IoWorkerThread함수를 실행하고,
 		HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, IoWorkerThread, (LPVOID)i, CREATE_SUSPENDED, (unsigned int*)&dwThreadId);
 		if (hThread == NULL)
 			return false;
 
+		// 위에서 thread 실행하면서 인자로 넘긴 i를 그대로 가지고, WorkerThread를 생성
 		mWorkerThread[i] = new WorkerThread(i, hThread, mCompletionPort);
 	}
 
 	/// start!
 	for (int i = 0; i < mIoThreadCount; ++i)
 	{
+		////TODO: ResumeThread()를 왜 해주어야 하나?
 		ResumeThread(mWorkerThread[i]->GetHandle());
 	}
 
@@ -170,6 +173,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 	LWorkerThreadId = reinterpret_cast<int>(lpParam);
 	LSendRequestSessionList = new std::deque<Session*>;
 
+	// thread 생성 직후, WorkerThread를 만들어서 넣어놓았으므로, 이렇게 해도 됨(?)
 	return GIocpManager->mWorkerThread[LWorkerThreadId]->Run();
 }
 

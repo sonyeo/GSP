@@ -9,12 +9,14 @@
 #include "IocpManager.h"
 
 
+// thread local storage에 선언
 __declspec(thread) int LThreadType = -1;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	LThreadType = THREAD_MAIN_ACCEPT;
 
+	// unhandled exception이 발생했을 때, minidump를 남기는 용도
 	/// for dump on crash
 	SetUnhandledExceptionFilter(ExceptionFilter);
 

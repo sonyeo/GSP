@@ -21,6 +21,7 @@ void SessionManager::PrepareSessions()
 {
 	CRASH_ASSERT(LThreadType == THREAD_MAIN);
 
+	// 세션을 미리 만들어 놓고
 	for (int i = 0; i < MAX_CONNECTION; ++i)
 	{
 		ClientSession* client = xnew<ClientSession>();
@@ -50,6 +51,9 @@ bool SessionManager::AcceptSessions()
 {
 	FastSpinlockGuard guard(mLock);
 
+	// 아무도 accept 안했으면, mCurrentIssueCount가 MAX_CONNECTION만큼이었을 것이고,
+	// retun이 된게 있으면, 다시 AcceptEx()호출하여야..
+	// 이거 overflow 날 수 있을듯
 	while (mCurrentIssueCount - mCurrentReturnCount < MAX_CONNECTION)
 	{
 		ClientSession* newClient = mFreeSessionList.back();
@@ -59,6 +63,7 @@ bool SessionManager::AcceptSessions()
 
 		newClient->AddRef(); ///< refcount +1 for issuing 
 		
+		// AcceptEx()를 호출해주는걸, Issue라고 하나봄
 		if (false == newClient->PostAccept())
 			return false;
 	}

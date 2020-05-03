@@ -35,19 +35,25 @@ public:
 
 	void construct(pointer p, const T& t)
 	{
+		// placement new! 받은 pointer에 생성자를 호출해줌(복사 생성자?)
 		new(p)T(t);
 	}
 
 	void destroy(pointer p)
 	{
+		// replace delete 메모리를 해제하지는 않음
 		p->~T();
 	}
 
+	// 이 아래의 메모리 할당/해제를 위한 풀을 만들었기에, 이런 custom allocator를 선언
+
+	// 메모리 할당시!
 	T* allocate(size_t n)
 	{
 		return static_cast<T*>(GMemoryPool->Allocate((int)n*sizeof(T)));
 	}
 
+	// 메모리 해제시!
 	void deallocate(T* ptr, size_t n)
 	{
 		GMemoryPool->Deallocate(ptr, -1599);

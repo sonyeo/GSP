@@ -1,6 +1,14 @@
 #pragma once
 
 
+// http://egloos.zum.com/sweeper/v/2414683
+// SLIST_ENTRY = interlocked stack
+// pop, push 밖에 없으나 원자적임
+// SLIST_ENTRY를 최상위로 하는 구조체로 하거나, SLIST_ENTRY를 상속
+
+// https://www.hoppipolla.me/2011/08/03/interlocked-singly-linked-lists/
+// MEMORY_ALLOCATION_ALIGNMENT?
+
 
 /// 커스텀하게 힙에서 할당 받는 애들은 전부 메모리 정보 붙여주기
 __declspec(align(MEMORY_ALLOCATION_ALIGNMENT))

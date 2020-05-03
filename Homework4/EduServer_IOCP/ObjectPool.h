@@ -24,6 +24,7 @@ public:
 			for (int i = 0; i < ALLOC_COUNT - 1; ++i)
 			{
 				/// OBJECT의 크기가 반드시 포인터 크기보다 커야 한다
+				// 임시로 다음 위치를 포인터값으로 넣어놓을꺼라서
 				pNext += sizeof(TOBJECT);
 				*ppCurr = pNext;
 				ppCurr = reinterpret_cast<uint8_t**>(pNext);

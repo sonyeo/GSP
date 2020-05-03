@@ -83,6 +83,7 @@ void ClientSession::AcceptCompletion()
 			break;
 		}
 
+		////TODO: SO_SNDBUF 는 뭔가 안해줘도 되나?
 		opt = 0;
 		if (SOCKET_ERROR == setsockopt(mSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&opt, sizeof(int)))
 		{
@@ -191,6 +192,7 @@ void ClientSession::RecvCompletion(DWORD transferred)
 {
 	FastSpinlockGuard criticalSection(mBufferLock);
 
+	// mBuffer에 Recv된 데이터를 보관하고 있고, 여기서 받은 크기만큼 확정지음
 	mBuffer.Commit(transferred);
 }
 

@@ -22,8 +22,9 @@ private:
 	typedef std::map<SOCKET, ClientSession*> ClientList;
 	ClientList	mClientList;
 
-	//TODO: mLock; 선언
+	FastSpinlock mLock;
 
+	////TODO: 여기도 volatile을 써야 하나?
 	volatile long mCurrentConnectionCount;
 };
 

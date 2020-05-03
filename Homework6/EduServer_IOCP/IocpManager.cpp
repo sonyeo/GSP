@@ -175,7 +175,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 	return GIocpManager->mIoWorkerThread[LWorkerThreadId-MAX_DB_THREAD]->Run();
 }
 
-
+// DB 작업을 한 결과는 IOCP를 통해 통지 할 수 있도록
 void IocpManager::PostDatabaseResult(DatabaseJobContext* dbContext)
 {
 	if (FALSE == PostQueuedCompletionStatus(mCompletionPort, 0, (ULONG_PTR)CK_DB_RESULT, (LPOVERLAPPED)dbContext))

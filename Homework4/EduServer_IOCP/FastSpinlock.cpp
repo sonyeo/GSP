@@ -24,8 +24,9 @@ void FastSpinlock::EnterWriteLock()
 	{
 		/// 다른놈이 writelock 풀어줄때까지 기다린다.
 		while (mLockFlag & LF_WRITE_MASK)
-			YieldProcessor();
+			YieldProcessor(); // CPU를 다른 thread에게 양보
 
+		// 위에서 확인하고 내려왔어도, 
 		if ((InterlockedAdd(&mLockFlag, LF_WRITE_FLAG) & LF_WRITE_MASK) == LF_WRITE_FLAG)
 		{
 			/// 다른놈이 readlock 풀어줄때까지 기다린다.

@@ -40,6 +40,7 @@ bool ServerSession::ConnectRequest()
 		return false;
 	}
 
+	// 자신의 소켓을 IOCP와 연결
 	HANDLE handle = CreateIoCompletionPort((HANDLE)mSocket, GIocpManager->GetComletionPort(), (ULONG_PTR)this, 0);
 	if (handle != GIocpManager->GetComletionPort())
 	{
@@ -50,6 +51,7 @@ bool ServerSession::ConnectRequest()
 
 	OverlappedConnectContext* context = new OverlappedConnectContext(this);
 
+	// 연결 시도!
 	if (FALSE == ConnectEx(mSocket, (sockaddr*)&serverSockAddr, sizeof(SOCKADDR_IN), NULL, 0, NULL, (LPWSAOVERLAPPED)context))
 	{
 		if (WSAGetLastError() != WSA_IO_PENDING)
@@ -98,6 +100,7 @@ void ServerSession::ConnectCompletion()
 		CRASH_ASSERT(false);
 	}
 
+	// 서버간 연결이 되어서도, RECV 0 은 해줘야, 처음 오는 Send를 받을 수 있음
 	if (false == PreRecv())
 	{
 		printf_s("[DEBUG] PreRecv for Server Connection error: %d\n", GetLastError());

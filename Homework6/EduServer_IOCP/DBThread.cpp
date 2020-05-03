@@ -30,8 +30,10 @@ void DBThread::DoDatabaseJob()
 	LPOVERLAPPED overlapped = nullptr;
 	ULONG_PTR completionKey = 0;
 
+	// DB용 IOCP의 통지를 기다림
 	int ret = GetQueuedCompletionStatus(mDbCompletionPort, &dwTransferred, (PULONG_PTR)&completionKey, &overlapped, INFINITE);
 
+	// DB 용이 아닌 작업이면 에러!
 	if (CK_DB_REQUEST != completionKey)
 	{
 		CRASH_ASSERT(false);

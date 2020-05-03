@@ -14,6 +14,7 @@ class LockOrderChecker;
 class FastSpinlock
 {
 public:
+	// lock에 order를 지정 할 수 있음
 	FastSpinlock(const int lockOrder=LO_DONT_CARE);
 	~FastSpinlock();
 
@@ -50,6 +51,7 @@ private:
 class FastSpinlockGuard
 {
 public:
+	// rw lock 기능 구현
 	FastSpinlockGuard(FastSpinlock& lock, bool exclusive = true) : mLock(lock), mExclusiveMode(exclusive)
 	{
 		if (mExclusiveMode)

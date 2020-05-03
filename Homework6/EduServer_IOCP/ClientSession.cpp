@@ -140,6 +140,7 @@ void ClientSession::AcceptCompletion()
 
 	printf_s("[DEBUG] Client Connected: IP=%s, PORT=%d\n", inet_ntoa(mClientAddr.sin_addr), ntohs(mClientAddr.sin_port));
 
+	// RECV 0 을 한번은 해줘야, 클라로부터 오는 패킷을 받을 수 있음
 	if (false == PreRecv())
 	{
 		printf_s("[DEBUG] PreRecv error: %d\n", GetLastError());

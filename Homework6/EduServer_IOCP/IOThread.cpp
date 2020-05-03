@@ -25,6 +25,7 @@ DWORD IOThread::Run()
 	{
 		DoIocpJob();
 
+		////TODO: 이건 왜 모아서?
 		DoSendJob(); ///< aggregated sends
 
 		//... ...
@@ -42,6 +43,8 @@ void IOThread::DoIocpJob()
 
 	int ret = GetQueuedCompletionStatus(mCompletionPort, &dwTransferred, (PULONG_PTR)&completionKey, &overlapped, GQCS_TIMEOUT);
 
+	// DB 작업을 한 결과면,
+	////TODO::DB 작업을 한 결과를 왜 DB용 IOCP에서 처리안하고 여기에서?
 	if (CK_DB_RESULT == completionKey)
 	{
 		//todo: DB 처리 결과가 담겨오는 경우 처리
@@ -76,12 +79,14 @@ void IOThread::DoIocpJob()
 		}
 	}
 
+	// remote는 ServerSession(서버간 연결시)이거나, ClientSession(클라 관련 처리)임
 	CRASH_ASSERT(nullptr != remote);
 
 	bool completionOk = false;
 	switch (context->mIoType)
 	{
 	case IO_CONNECT:
+		// 다른 Server와의 연결이 성공한 것이므로, 
 		dynamic_cast<ServerSession*>(remote)->ConnectCompletion();
 		completionOk = true;
 		break;

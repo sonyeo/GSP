@@ -2,11 +2,13 @@
 #include "Exception.h"
 #include <DbgHelp.h>
 
-
+// https://sunhyeon.wordpress.com/2015/11/08/1899/
+// dbghelp.lib 링크 + Linker/Debugging/Generate Debug Info = YES(/DEBUG) -> pdb 파일 생성
 LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
 {
+	// 디버깅 중이면, 구지 minidump를 남기지 않음
 	if ( IsDebuggerPresent() )
-		return EXCEPTION_CONTINUE_SEARCH ;
+		return EXCEPTION_CONTINUE_SEARCH ; // global unwind 수행X
 
 
 	/// dump file 남기자.
@@ -27,6 +29,7 @@ LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
 			MiniDumpWithDataSegs | MiniDumpWithHandleData | MiniDumpWithFullMemoryInfo | 
 			MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules ) ; 
 
+		// mini dump는 이렇게 남기면 됨
 		MiniDumpWriteDump( GetCurrentProcess(), GetCurrentProcessId(), 
 			hFile, mdt, (exceptionInfo != 0) ? &mdei : 0, 0, NULL ) ; 
 
@@ -38,6 +41,8 @@ LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
 		printf("CreateFile failed. Error: %u \n", GetLastError()) ; 
 	}
 
+	// global unwind 수행
+	////TODO: 어떤 의미?
 	return EXCEPTION_EXECUTE_HANDLER  ;
 	
 }

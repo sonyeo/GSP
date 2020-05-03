@@ -29,6 +29,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (false == GDatabaseManager->Initialize())
 		return -1;
 
+	// DB thread부터 생성
 	if (false == GDatabaseManager->StartDatabaseThreads())
 		return -1;
 

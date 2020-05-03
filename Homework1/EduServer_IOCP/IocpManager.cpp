@@ -6,6 +6,7 @@
 
 #define GQCS_TIMEOUT	20
 
+// thread local storage에 선언. thread마다 번호를 붙임
 __declspec(thread) int LIoThreadId = 0;
 IocpManager* GIocpManager = nullptr;
 
@@ -20,7 +21,10 @@ IocpManager::~IocpManager()
 
 bool IocpManager::Initialize()
 {
-	//TODO: mIoThreadCount = ...;GetSystemInfo사용해서 set num of I/O threads
+	/// set num of I/O threads
+	SYSTEM_INFO si;
+	GetSystemInfo(&si);
+	mIoThreadCount = si.dwNumberOfProcessors;
 
 	/// winsock initializing
 	WSADATA wsa;
@@ -28,17 +32,29 @@ bool IocpManager::Initialize()
 		return false;
 
 	/// Create I/O Completion Port
-	//TODO: mCompletionPort = CreateIoCompletionPort(...)
+	mCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+	if (mCompletionPort == NULL)
+		return false;
 	
 	/// create TCP socket
-	//TODO: mListenSocket = ...
-	
+	mListenSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (mListenSocket == INVALID_SOCKET)
+		return false;
+
+	// https://m.blog.naver.com/PostView.nhn?blogId=bringmelove1&logNo=119146643&proxyReferer=https:%2F%2Fwww.google.com%2F
+	// 서버를 종료시켰다 다시 띄울 때, 이미 사용중인 소켓이라면서 에러나는 경우 방어
 	int opt = 1;
 	setsockopt(mListenSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(int));
 
-	//TODO:  bind
-	//if (SOCKET_ERROR == bind(mListenSocket, (SOCKADDR*)&serveraddr, sizeof(serveraddr)))
-	//	return false;
+	/// bind
+	SOCKADDR_IN serveraddr;
+	ZeroMemory(&serveraddr, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	serveraddr.sin_port = htons(LISTEN_PORT);
+	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+	if (SOCKET_ERROR == bind(mListenSocket, (SOCKADDR*)&serveraddr, sizeof(serveraddr)))
+		return false;
 
 	return true;
 }
@@ -50,7 +66,10 @@ bool IocpManager::StartIoThreads()
 	for (int i = 0; i < mIoThreadCount; ++i)
 	{
 		DWORD dwThreadId;
-		//TODO: HANDLE hThread = (HANDLE)_beginthreadex...);
+		// i + 1 를 IoWorkerThread() 함수의 파라미터로 넘겨서, thread마다 번호를 붙여준다.
+		HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, IoWorkerThread, (LPVOID)(i + 1), 0, (unsigned int*)&dwThreadId);
+		if (hThread == NULL)
+			return false;
 	}
 
 	return true;
@@ -106,6 +125,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 {
 	LThreadType = THREAD_IO_WORKER;
 
+	// thread마다 번호를 붙임
 	LIoThreadId = reinterpret_cast<int>(lpParam);
 	HANDLE hComletionPort = GIocpManager->GetComletionPort();
 
@@ -113,9 +133,12 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 	{
 		DWORD dwTransferred = 0;
 		OverlappedIOContext* context = nullptr;
+		ULONG_PTR completionKey = 0;
 		ClientSession* asCompletionKey = nullptr;
 
-		int ret = 0; ///<여기에는 GetQueuedCompletionStatus(hComletionPort, ..., GQCS_TIMEOUT)를 수행한 결과값을 대입
+		int ret = GetQueuedCompletionStatus(hComletionPort, &dwTransferred, (PULONG_PTR)&completionKey, (LPOVERLAPPED*)&context, GQCS_TIMEOUT);
+
+		//ClientSession* theClient = context ? context->mSessionObject : nullptr;
 
 		/// check time out first 
 		if (ret == 0 && GetLastError()==WAIT_TIMEOUT)

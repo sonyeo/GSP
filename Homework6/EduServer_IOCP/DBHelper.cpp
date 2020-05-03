@@ -33,15 +33,19 @@ DBHelper::~DBHelper()
 
 bool DBHelper::Initialize(const wchar_t* connInfoStr, int workerThreadCount)
 {
+	// SQLHDBC(DB연결) + SQLHSTMT(쿼리날리는용) 인 구조체를 thread 수만큼 만들고
 	mSqlConnPool = new SQL_CONN[workerThreadCount];
 	mDbWorkerThreadCount = workerThreadCount;
 
+	// ENV는 1개만 있으면 되나봄
+	// ENV 세팅
 	if (SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &mSqlHenv))
 	{
 		printf_s("DbHelper Initialize SQLAllocHandle failed\n");
 		return false;
 	}
 
+	// ODBC 버전 세팅
 	if (SQL_SUCCESS != SQLSetEnvAttr(mSqlHenv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, SQL_IS_INTEGER))
 	{
 		printf_s("DbHelper Initialize SQLSetEnvAttr failed\n");
@@ -51,12 +55,14 @@ bool DBHelper::Initialize(const wchar_t* connInfoStr, int workerThreadCount)
 	/// 스레드별로 SQL connection을 풀링하는 방식
 	for (int i = 0; i < mDbWorkerThreadCount; ++i)
 	{
+		// thread 수만큼 DBC
 		if (SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_DBC, mSqlHenv, &mSqlConnPool[i].mSqlHdbc))
 		{
 			printf_s("DbHelper Initialize SQLAllocHandle failed\n");
 			return false;
 		}
 		
+		// 접속 정보(connInfoStr)를 토대로 접속을 하고,
 		SQLSMALLINT resultLen = 0;
 		SQLRETURN ret = SQLDriverConnect(mSqlConnPool[i].mSqlHdbc, NULL, (SQLWCHAR*)connInfoStr, (SQLSMALLINT)wcslen(connInfoStr), NULL, 0, &resultLen, SQL_DRIVER_NOPROMPT);
 		if (SQL_SUCCESS != ret && SQL_SUCCESS_WITH_INFO != ret)
@@ -73,6 +79,7 @@ bool DBHelper::Initialize(const wchar_t* connInfoStr, int workerThreadCount)
 			return false;
 		}
 
+		// STMT를 생성
 		if (SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_STMT, mSqlConnPool[i].mSqlHdbc, &mSqlConnPool[i].mSqlHstmt))
 		{
 			printf_s("DbHelper Initialize SQLAllocHandle SQL_HANDLE_STMT failed\n");
@@ -241,6 +248,7 @@ void DBHelper::PrintSqlStmtError()
 	SQLWCHAR msgText[1024] = { 0, };
 	SQLSMALLINT textLen = 0;
 
+	// 에러 정보를 가져오는 함수였군
 	SQLGetDiagRec(SQL_HANDLE_STMT, mCurrentSqlHstmt, 1, sqlState, &nativeError, msgText, 1024, &textLen);
 
 	wprintf_s(L"DbHelper SQL Statement Error: %ls \n", msgText);

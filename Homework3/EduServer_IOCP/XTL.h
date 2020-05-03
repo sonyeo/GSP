@@ -9,10 +9,18 @@
 #include <map>
 #include <queue>
 
+// https://openmynotepad.tistory.com/57
+// custom allocator는
+// 아래의 typedef들을 정의하고(value_type만 필수인듯)
+// rebind만 정의하면 됨
+
+// https://openmynotepad.tistory.com/58?category=854742
+// 구체적인 예시
 template <class T>
 class STLAllocator
 {
 public:
+	// 생성자+소멸자는 default로! 다른 함수에서 해주게 됨
 	STLAllocator() = default;
 
 	typedef T value_type;
@@ -23,21 +31,26 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 
+	// 복사 생성자 정의
 	template <class U>
 	STLAllocator(const STLAllocator<U>&)
 	{}
 
+	// 사용 중지 권고되었다 함
 	template <class U>
 	struct rebind
 	{
 		typedef STLAllocator<U> other;
 	};
 
+	// 생성자를 호출해주는! 받은 위치에 placement new를 호출해준다.
+	////TODO: const T& t에는 뭐가 오는거지??
 	void construct(pointer p, const T& t)
 	{
 		new(p)T(t);
 	}
 
+	// 소멸자를 호출
 	void destroy(pointer p)
 	{
 		p->~T();

@@ -13,9 +13,12 @@ private:
 	FastSpinlock(const FastSpinlock& rhs);
 	FastSpinlock& operator=(const FastSpinlock& rhs);
 
+	// InterlockedExchange()를 통해서 이 변수를 사용해 lock을 걸 예정
+	////TODO: volatile 을 꼭 써야하나?
 	volatile long mLockFlag;
 };
 
+// 특정 scope에 들어가고 나갈때, 생성자&소멸자를 통해 lock을 자동으로 걸고 해제하기위한 class
 class FastSpinlockGuard
 {
 public:
@@ -33,6 +36,8 @@ private:
 	FastSpinlock& mLock;
 };
 
+// class단위로 유일한 lock을 만드는 용도
+////TODO: 어디에 사용할까?
 template <class TargetClass>
 class ClassTypeLock
 {

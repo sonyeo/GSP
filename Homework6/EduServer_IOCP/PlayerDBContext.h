@@ -2,6 +2,8 @@
 #include "ContentsConfig.h"
 #include "DBContext.h"
 
+// DB 쿼리마다 Context 1개씩 생성해 놓음
+
 //todo: Player 생성 작업 DB context만들기
 //struct CreatePlayerDataContext
 //{

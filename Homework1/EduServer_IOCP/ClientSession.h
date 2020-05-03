@@ -65,7 +65,7 @@ private:
 
 	SOCKADDR_IN		mClientAddr ;
 		
-	//TODO: mLock; 선언할 것
+	FastSpinlock	mBufferLock;
 
 	friend class SessionManager;
 } ;

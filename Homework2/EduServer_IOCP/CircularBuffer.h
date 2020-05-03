@@ -32,6 +32,7 @@ public:
 	/// 버퍼의 첫부분 len만큼 날리기
 	void Remove(size_t len) ;
 
+	// A버퍼를 계속 쓰다가, 그 앞에 B버퍼를 다시 쓰기 시작
 	size_t GetFreeSpaceSize()
 	{
 		if ( mBRegionPointer != nullptr )
@@ -54,6 +55,7 @@ public:
 		return mARegionSize + mBRegionSize ;
 	}
 
+	// A가 남은게 있으면 A사이즈, 없으면 B사이즈
 	size_t GetContiguiousBytes() const 
 	{
 		if ( mARegionSize > 0 )
@@ -83,6 +85,7 @@ public:
 			mARegionSize += len ;
 	}
 
+	// A가 남아있으면 A를 리턴, 아니면 B 리턴
 	/// 버퍼의 첫부분 리턴
 	char* GetBufferStart() const
 	{
